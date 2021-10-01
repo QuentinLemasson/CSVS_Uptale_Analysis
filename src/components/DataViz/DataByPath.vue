@@ -1,7 +1,7 @@
 <template>
     <div id=content>
-        <PathSelector id=pathSelector :data='data'/>
-        <PathVisualization id=graph :data='data[0].data'/> 
+        <PathSelector @pathChange='changeItem' id=pathSelector :data='data'/>
+        <PathVisualization id=graph :data='actualItem.data'/> 
         <div id=users></div>
     </div>
 </template>
@@ -21,6 +21,20 @@ export default {
   props: {
     data: Array
   },
+  data() {
+    return {
+      actualItem : Object
+    }
+  },
+  created() {
+    this.actualItem=this.data[0];
+  },
+  methods: {
+    changeItem(id){
+      console.log(id)
+      this.actualItem = this.data.find(e=>e.id==id);
+    }
+  }
 };
 </script>
 

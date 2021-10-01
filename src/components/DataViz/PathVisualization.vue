@@ -16,11 +16,14 @@ export default {
   props: {
     data: Array
   }, 
+  watch: { 
+    data: function(newData) { // watch it
+        let data = proxyToStructure(newData).data;
+        this.draw(data);
+    }
+  },
   mounted(){
-        console.log("mounted"); 
         let data = proxyToStructure(this.data).data;
-        console.log(data);
-
         this.draw(data);
   },
   methods : {
@@ -30,12 +33,10 @@ export default {
 
 
         const global_container = d3.select('#viz')
+        global_container.selectAll('*').remove()
 
         const width = global_container.node().getBoundingClientRect().width;
         const height = global_container.node().getBoundingClientRect().height;
-
-        // const width = 0;
-        // const height = 0;
 
         const margin = {top: 50, right: 150, bottom: 160, left: 50};
         const innerpadding = 10;
@@ -52,7 +53,7 @@ export default {
 
         // 6. Y scale will use the randomly generate number 
         var yScale = d3.scaleLinear()
-            .domain([0, d3.max(data[0].zones.map(e=>e.founded))]) // input 
+            .domain([0, d3.max( data.map( d => d3.max(d.zones.map(e=>e.founded)) ) )]) // input 
             .range([innerheight, 0]); // output 
 
         // 4. Call the y axis in a group tag

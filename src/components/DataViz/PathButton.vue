@@ -1,5 +1,5 @@
 <template>
-    <button id=pathbutton>
+    <button @click='$emit("pathChange", path.id)' id=pathbutton>
         Path #{{path.id}} 
     </button>
 </template>
@@ -10,7 +10,8 @@ export default {
   name: "PathButton",
   props: {
     path: Object
-  }
+  },
+  emits: ['pathChange']
 };
 </script>
 

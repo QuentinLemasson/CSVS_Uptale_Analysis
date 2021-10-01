@@ -1,6 +1,6 @@
 <template>
     <div id=buttonContainer>
-        <PathButton v-for='path in data' :key='path.id' :path='path'/>
+        <PathButton @pathChange='relayPathChange' v-for='path in data' :key='path.id' :path='path'/>
     </div>
 </template>
 
@@ -14,6 +14,12 @@ export default {
   },
   props: {
     data: Array
+  },
+  emits: ['pathChange'],
+  methods: {
+    relayPathChange(id){
+      this.$emit("pathChange", id)
+    }
   }
 };
 </script>
