@@ -29,8 +29,10 @@ export default {
         console.log(data)
 
 
-        const width = d3.select('#graph').node().getBoundingClientRect().width;
-        const height = d3.select('#graph').node().getBoundingClientRect().height;
+        const global_container = d3.select('#viz')
+
+        const width = global_container.node().getBoundingClientRect().width;
+        const height = global_container.node().getBoundingClientRect().height;
 
         // const width = 0;
         // const height = 0;
@@ -41,10 +43,6 @@ export default {
         const innerheight=height - margin.top - margin.bottom;
 
         const xpadding=0;
-
-        const global_container = d3.select('#viz')
-            .attr('width', `${width}px`)
-            .attr('height', `${height}px`);
 
         // const xScale =
         // const yScale =
@@ -161,6 +159,7 @@ export default {
 
 #viz{
     background-color: rgb(207, 207, 207);
+    width:100%; height:100%;
 }
 
 #innerContainer{

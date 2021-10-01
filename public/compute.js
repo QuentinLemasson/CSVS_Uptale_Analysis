@@ -102,6 +102,10 @@ const setPaths = function (data) {
         }
 
     })
+
+    console.log('setpath');
+    console.log(reduced)
+
     return reduced;
 }
 
@@ -610,6 +614,7 @@ const computeData = function (files, merge_themes) {
  * @returns {Array} Array of scenes in which you can find every user and their scores
  */
 const perUserScores = function (paths) {
+
     let results = {};
     paths.forEach((targetSession) => {
         //Une session, toutes les scènes avec des réponses à des QCM
@@ -644,6 +649,7 @@ const perUserScores = function (paths) {
         })
         return acc
     }, {})
+
     return results
 }
 
