@@ -38,7 +38,7 @@ export default {
         // const height = 0;
 
         const margin = {top: 50, right: 150, bottom: 160, left: 50};
-        const innerpadding = 20;
+        const innerpadding = 10;
 
         const innerwidth=width - margin.left - margin.right;
         const innerheight=height - margin.top - margin.bottom;
@@ -46,7 +46,7 @@ export default {
         const axisSizes = data.map(e => e.zones.length);
         const axisTotalSize = axisSizes.reduce((a,b) => a+b);
 
-        const innerwidths = axisSizes.map(e => (innerwidth-innerpadding*(axisSizes.length-1)) * (e/axisTotalSize));
+        const innerwidths = axisSizes.map(e => (innerwidth-(innerpadding*(axisSizes.length-1))) * (e/axisTotalSize));
         console.log('innerwidths')
         console.log(innerwidths)
 
@@ -55,18 +55,21 @@ export default {
             .domain([0, d3.max(data[0].zones.map(e=>e.founded))]) // input 
             .range([innerheight, 0]); // output 
 
-        
-
         // 4. Call the y axis in a group tag
         global_container.append("g")
             .attr("class", "y axis")
             .attr("transform", "translate("+ margin.left +"," + margin.top +")")
             .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
 
-        this.drawScene(global_container,data[0],yScale,innerwidth, innerheight, margin)
+        data.forEach((d,i) => {
+            console.log('distance',innerwidths.reduce((a,b,ind)=>ind<i?a+b:a))
+            const distanceLeft = innerpadding*i + (i==0?0:innerwidths.reduce((a,b,ind)=>ind<i?a+b:a)) + 5;
+            let innerContainer = global_container.append("g").attr('class','SceneScoresInPath').attr("transform",`translate(${margin.left +distanceLeft},${margin.top})`)
+            this.drawScene(innerContainer,d,yScale,innerwidths[i], innerheight, distanceLeft);
+        });       
     },
 
-    drawScene(container, data, yScale, innerwidth, innerheight, margin){
+    drawScene(container, data, yScale, innerwidth, innerheight, distanceLeft){
         // 5. X scale will use the index of our data
         let xScale = d3.scaleBand()
             .domain(data.zones.map(e=>e.tag)) // input
@@ -74,10 +77,10 @@ export default {
             .paddingInner(0.05)
             .paddingOuter(0.2); // output
 
-        let innerContainer = container.append('rect')
+        container.append('rect')
             .attr("id", "innerContainer")
-            .attr('x',margin.left)
-            .attr('y',margin.top)
+            .attr('x',0)
+            .attr('y',0)
             .attr("width", innerwidth)
             .attr("height", innerheight)
             .attr("fill",'white');
@@ -86,13 +89,14 @@ export default {
         const xAxis = d3.axisBottom(xScale);
         container.append("g")
             .attr("class", "x axis")
-            .attr("transform", "translate("+ margin.left +"," + (innerheight + margin.top) +")")
+            .attr("transform", "translate(0," + innerheight +")")
             .call(xAxis) // Create an axis component with d3.axisBottom
             .selectAll("text")
                 .attr("transform", "translate(80,70)rotate(45)");
 
         // 12. Appends a circle for each datapoint 
-        let dots = container.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
+        let dots = container.append('g')
+        // .attr('transform', `translate(${margin.left},${margin.top})`)
 
         dots.append('g').selectAll(".dot.founded")
             .data(data.zones)
@@ -107,7 +111,7 @@ export default {
                     this.highlightDot(dots, xScale(d.tag)+xScale.bandwidth(),
                                             yScale(d.scored),
                                             yScale(d.founded),
-                                            xScale(d.tag)+xScale.bandwidth(),
+                                            xScale(d.tag)+xScale.bandwidth()+distanceLeft,
                                             innerheight-yScale(d.scored),
                                             innerheight-yScale(d.founded))
                 })
@@ -126,7 +130,7 @@ export default {
                     this.highlightDot(dots, xScale(d.tag)+xScale.bandwidth(),
                                             yScale(d.scored),
                                             yScale(d.founded),
-                                            xScale(d.tag)+xScale.bandwidth(),
+                                            xScale(d.tag)+xScale.bandwidth()+distanceLeft,
                                             innerheight-yScale(d.scored),
                                             innerheight-yScale(d.founded))
                 })

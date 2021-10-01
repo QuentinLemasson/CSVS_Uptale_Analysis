@@ -92,8 +92,8 @@ const setPaths = function (data) {
             let currentScene = {
                 duration: currentSceneActions[currentSceneActions.length - 1].EventTime - currentSceneActions[0].EventTime,
                 enterTime: currentSceneActions[0].EventTime,
-                fromScene: i == 0 ? "Start_Experience" : e.actions[indexesOfChangeWorld[i - 1]].SceneId,
-                scene: currentSceneActions[0].SceneId,
+                fromScene: i == 0 ? "Start_Experience" : e.actions[indexesOfChangeWorld[i - 1]].SceneName,
+                scene: currentSceneActions[0].SceneName,
                 zonesFound: currentSceneActions.filter(e => e.EventName == "Launch_QcmAnswerClick").map(e=>({tag:e.TagName, time:e.EventTime})),
                 zonesScored: currentSceneActions.filter(e => e.EventName == "Launch_WinStar").map(e=>({tag:e.TagName, time:e.EventTime})),
                 actions: currentSceneActions
@@ -474,6 +474,8 @@ const extractScorePerPath = (computedPaths,mapScenes) => {
         })
     })
 
+    console.log('AnalysedScenes',analysedScenes)
+
     computedPaths.forEach(compPath => {
         //extract score details per user
         let users = [];
@@ -585,8 +587,8 @@ const computeData = function (files, merge_themes) {
 
     //Get scenes array from csv
     let availableScenes = Object.keys(output.detail_usage_output.reduce((acc, e) => {
-        if (e.SceneId) {
-            acc[e.SceneId] = true
+        if (e.SceneName) {
+            acc[e.SceneName] = true
         }
         return acc
     }, {}))
@@ -655,7 +657,13 @@ const perUserScores = function (paths) {
         return acc
     }, {})
 
+    console.log("perUserScores", results)
+    
     return results
+}
+
+const qcmPerChamber = detail => {
+
 }
 
 
