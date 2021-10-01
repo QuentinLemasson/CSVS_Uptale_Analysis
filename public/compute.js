@@ -463,9 +463,7 @@ const extractScorePerPath = (computedPaths,mapScenes) => {
                     d.zonesFound.forEach(z=>{
                         if(analysedScenes.find(el=> el.id==d.name).zones.findIndex(el=>z.tag==el.tag)==-1){
                             analysedScenes.find(el=> el.id==d.name).zones.push({
-                                tag : z.tag,
-                                // founded : 0,
-                                // scored : 0
+                                tag : z.tag
                             })
                         }
                     })
