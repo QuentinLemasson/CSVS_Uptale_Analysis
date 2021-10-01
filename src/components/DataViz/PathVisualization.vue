@@ -21,7 +21,7 @@ export default {
         let data = proxyToStructure(this.data).data;
         console.log(data);
 
-        this.draw(data[0]);
+        this.draw(data);
   },
   methods : {
     draw(data){
@@ -37,35 +37,44 @@ export default {
         // const width = 0;
         // const height = 0;
 
-        var margin = {top: 50, right: 150, bottom: 160, left: 50};
+        const margin = {top: 50, right: 150, bottom: 160, left: 50};
+        const innerpadding = 20;
 
         const innerwidth=width - margin.left - margin.right;
         const innerheight=height - margin.top - margin.bottom;
 
-        const xpadding=0;
+        const axisSizes = data.map(e => e.zones.length);
+        const axisTotalSize = axisSizes.reduce((a,b) => a+b);
 
-        // const xScale =
-        // const yScale =
-        // 5. X scale will use the index of our data
-        let xScale = d3.scaleOrdinal()
-            .domain(data.zones.map(e=>e.tag)) // input
-            .range(data.zones.map((e,i)=>(innerwidth-(xpadding*2))*(i/(data.zones.length-1))+xpadding)); // output
-
+        const innerwidths = axisSizes.map(e => (innerwidth-innerpadding*(axisSizes.length-1)) * (e/axisTotalSize));
+        console.log('innerwidths')
+        console.log(innerwidths)
 
         // 6. Y scale will use the randomly generate number 
         var yScale = d3.scaleLinear()
-            .domain([0, d3.max(data.zones.map(e=>e.founded))]) // input 
+            .domain([0, d3.max(data[0].zones.map(e=>e.founded))]) // input 
             .range([innerheight, 0]); // output 
 
-        // 7. d3's line generator
-        const line = (param) => {
-            return d3.line()
-                .x(function(d) { return xScale(d.tag); }) // set the x values for the line generator
-                .y(function(d) { return yScale(d[param]); }) // set the y values for the line generator 
-                .curve(d3.curveMonotoneX)
-        } 
+        
 
-        let innerContainer = global_container.append('rect')
+        // 4. Call the y axis in a group tag
+        global_container.append("g")
+            .attr("class", "y axis")
+            .attr("transform", "translate("+ margin.left +"," + margin.top +")")
+            .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+
+        this.drawScene(global_container,data[0],yScale,innerwidth, innerheight, margin)
+    },
+
+    drawScene(container, data, yScale, innerwidth, innerheight, margin){
+        // 5. X scale will use the index of our data
+        let xScale = d3.scaleBand()
+            .domain(data.zones.map(e=>e.tag)) // input
+            .range([0,innerwidth])
+            .paddingInner(0.05)
+            .paddingOuter(0.2); // output
+
+        let innerContainer = container.append('rect')
             .attr("id", "innerContainer")
             .attr('x',margin.left)
             .attr('y',margin.top)
@@ -74,62 +83,60 @@ export default {
             .attr("fill",'white');
 
         // 3. Call the x axis in a group tag
-        global_container.append("g")
+        const xAxis = d3.axisBottom(xScale);
+        container.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate("+ margin.left +"," + (innerheight + margin.top) +")")
-            .call(d3.axisBottom(xScale)) // Create an axis component with d3.axisBottom
+            .call(xAxis) // Create an axis component with d3.axisBottom
             .selectAll("text")
                 .attr("transform", "translate(80,70)rotate(45)");
 
-        // 4. Call the y axis in a group tag
-        global_container.append("g")
-            .attr("class", "y axis")
-            .attr("transform", "translate("+ margin.left +"," + margin.top +")")
-            .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
-
         // 12. Appends a circle for each datapoint 
-        let dots = global_container.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
-
-        dots.append("path")
-            .datum(data.zones) // 10. Binds data to the line 
-            .attr("class", "line founded") // Assign a class for styling 
-            .attr("d", line('founded')); // 11. Calls the line generator 
+        let dots = container.append('g').attr('transform', `translate(${margin.left},${margin.top})`)
 
         dots.append('g').selectAll(".dot.founded")
             .data(data.zones)
-            .join("circle") // Uses the enter().append() method
+            .join("rect") // Uses the enter().append() method
                 .attr("class", "dot founded") // Assign a class for styling
-                .attr("cx", function(d) { return xScale(d.tag) })
-                .attr("cy", function(d) { return yScale(d.founded) })
-                .attr("r", 10)
+                .attr("x", d => xScale(d.tag))
+                .attr("y", d => yScale(d.founded))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d =>  innerheight-yScale(d.founded))
                 .on('mouseover',e => {
                     const d = e.originalTarget.__data__;
-                    this.highlightDot(dots,xScale(d.tag),yScale(d.founded),xScale(d.tag),innerheight-yScale(d.founded))
+                    this.highlightDot(dots, xScale(d.tag)+xScale.bandwidth(),
+                                            yScale(d.scored),
+                                            yScale(d.founded),
+                                            xScale(d.tag)+xScale.bandwidth(),
+                                            innerheight-yScale(d.scored),
+                                            innerheight-yScale(d.founded))
                 })
                 .on('mouseout',() => this.destroyElements(dots,'.dashed_line'))
 
-        dots.append("path")
-            .datum(data.zones) // 10. Binds data to the line 
-            .attr("class", "line scored") // Assign a class for styling 
-            .attr("d", line("scored")); // 11. Calls the line generator 
-
         dots.append('g').selectAll(".dot.scored")
             .data(data.zones)
-            .join("circle") // Uses the enter().append() method
+            .join("rect") // Uses the enter().append() method
                 .attr("class", "dot scored") // Assign a class for styling
-                .attr("cx", function(d) { return xScale(d.tag) })
-                .attr("cy", function(d) { return yScale(d.scored) })
-                .attr("r", 10)
+                .attr("x", d => xScale(d.tag))
+                .attr("y", d => yScale(d.scored))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d =>  innerheight-yScale(d.scored))
                 .on('mouseover',e => {
                     const d = e.originalTarget.__data__;
-                    this.highlightDot(dots,xScale(d.tag),yScale(d.scored),xScale(d.tag),innerheight-yScale(d.scored))
+                    this.highlightDot(dots, xScale(d.tag)+xScale.bandwidth(),
+                                            yScale(d.scored),
+                                            yScale(d.founded),
+                                            xScale(d.tag)+xScale.bandwidth(),
+                                            innerheight-yScale(d.scored),
+                                            innerheight-yScale(d.founded))
                 })
                 .on('mouseout',() => this.destroyElements(dots,'.dashed_line'))
     },
 
-    highlightDot(container, x, y, w, h){
-        this.drawDashedLine(container, {x:x-w,y:y}, {x:x,y:y})
-        this.drawDashedLine(container, {x:x,y:y+h}, {x:x,y:y})
+    highlightDot(container, x, ys, yf, w, hs, hf,){
+        this.drawDashedLine(container, {x:x-w,y:ys}, {x:x,y:ys})
+        this.drawDashedLine(container, {x:x-w,y:yf}, {x:x,y:yf})
+        this.drawDashedLine(container, {x:x,y:yf+hf}, {x:x,y:yf})
     },
 
     drawDashedLine(container, p1, p2){
@@ -144,7 +151,7 @@ export default {
             .attr('x2', p2.x)
             .attr('y2', p2.y)
             .attr('stroke', 'black')
-            .attr('stroke-width', 3)
+            .attr('stroke-width', 2)
             .attr("stroke-dasharray","16, 4")       
     },
 

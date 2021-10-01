@@ -20,7 +20,7 @@ export default {
   },
   props: {
     data: Array
-  }
+  },
 };
 </script>
 

@@ -94,8 +94,8 @@ const setPaths = function (data) {
                 enterTime: currentSceneActions[0].EventTime,
                 fromScene: i == 0 ? "Start_Experience" : e.actions[indexesOfChangeWorld[i - 1]].SceneId,
                 scene: currentSceneActions[0].SceneId,
-                zonesFound: currentSceneActions.filter(e => e.EventName == "Launch_QcmAnswerClick"),
-                zonesScored: currentSceneActions.filter(e => e.EventName == "Launch_WinStar"),
+                zonesFound: currentSceneActions.filter(e => e.EventName == "Launch_QcmAnswerClick").map(e=>({tag:e.TagName, time:e.EventTime})),
+                zonesScored: currentSceneActions.filter(e => e.EventName == "Launch_WinStar").map(e=>({tag:e.TagName, time:e.EventTime})),
                 actions: currentSceneActions
             }
             e.scenes.push(currentScene)
@@ -540,6 +540,10 @@ const computeData = function (files, merge_themes) {
     output.themes = arrayToMap(files.categories.arrayThemes);
     output.scenes = arrayToMap(files.categories.arrayScenes);
 
+    output.detail_usage_output = files["detail"].sort(
+        fieldSorterOptimized(["SessionId", "EventTime"])
+    );
+
     //suppressing duplicate data due to an Uptale bug
     //duplicate matches EventTime, EventName and SessionID
     output.detail_usage_output = Object.values(output.detail_usage_output.reduce(
@@ -551,9 +555,7 @@ const computeData = function (files, merge_themes) {
     ));
     //format EventTime to Date format
 
-    output.detail_usage_output = files["detail"].sort(
-        fieldSorterOptimized(["SessionId", "EventTime"])
-    );
+    
 
     //sort data by sessionID and Date to ensure events are in correct order
 
@@ -602,6 +604,9 @@ const computeData = function (files, merge_themes) {
     output.scenes = arrayToMap(files.categories.arrayScenes)
     output.themes = arrayToMap(files.categories.arrayThemes);
     output.categories = arrayToMap(files.categories.arrayCategories);
+
+    console.log('computeData : Results')
+    console.log(output.detail_usage_output)
 
     output.paths = setPaths(output.detail_usage_output, output.scenes);
     output.computedPaths = computePaths(output.paths, output.scenes, merge_themes);
