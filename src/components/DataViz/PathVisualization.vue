@@ -28,9 +28,6 @@ export default {
   },
   methods : {
     draw(data){
-        console.log('***Data To visualize***');
-        console.log(data)
-
 
         const global_container = d3.select('#viz')
         global_container.selectAll('*').remove()
@@ -38,7 +35,7 @@ export default {
         const width = global_container.node().getBoundingClientRect().width;
         const height = global_container.node().getBoundingClientRect().height;
 
-        const margin = {top: 50, right: 150, bottom: 160, left: 50};
+        const margin = {top: 50, right: 150, bottom: 180, left: 50};
         const innerpadding = 10;
 
         const innerwidth=width - margin.left - margin.right;
@@ -48,22 +45,21 @@ export default {
         const axisTotalSize = axisSizes.reduce((a,b) => a+b);
 
         const innerwidths = axisSizes.map(e => (innerwidth-(innerpadding*(axisSizes.length-1))) * (e/axisTotalSize));
-        console.log('innerwidths')
-        console.log(innerwidths)
 
         // 6. Y scale will use the randomly generate number 
         var yScale = d3.scaleLinear()
-            .domain([0, d3.max( data.map( d => d3.max(d.zones.map(e=>e.founded)) ) )]) // input 
+            .domain([0, d3.max( data.map( d => d.access ) )]) // input 
             .range([innerheight, 0]); // output 
 
         // 4. Call the y axis in a group tag
         global_container.append("g")
             .attr("class", "y axis")
             .attr("transform", "translate("+ margin.left +"," + margin.top +")")
-            .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+            .call(d3.axisLeft(yScale)
+                .tickValues(yScale.ticks().filter(tick => Number.isInteger(tick)))
+                .tickFormat(d3.format("d"))); // Create an axis component with d3.axisLeft
 
         data.forEach((d,i) => {
-            console.log('distance',innerwidths.reduce((a,b,ind)=>ind<i?a+b:a))
             const distanceLeft = innerpadding*i + (i==0?0:innerwidths.reduce((a,b,ind)=>ind<i?a+b:a)) + 5;
             let innerContainer = global_container.append("g").attr('class','SceneScoresInPath').attr("transform",`translate(${margin.left +distanceLeft},${margin.top})`)
             this.drawScene(innerContainer,d,yScale,innerwidths[i], innerheight, distanceLeft);
@@ -71,6 +67,14 @@ export default {
     },
 
     drawScene(container, data, yScale, innerwidth, innerheight, distanceLeft){
+
+        container.append('text')
+            .attr('x',10)
+            .attr('y',-20)
+            .text(data.id)
+            .attr('font-size', 'smaller')
+
+
         // 5. X scale will use the index of our data
         let xScale = d3.scaleBand()
             .domain(data.zones.map(e=>e.tag)) // input
@@ -136,28 +140,27 @@ export default {
                                             innerheight-yScale(d.founded))
                 })
                 .on('mouseout',() => this.destroyElements(dots,'.dashed_line'))
+
+        this.drawLine(container, 'occurenceLine', {x:0,y:yScale(data.access)}, {x:innerwidth,y:yScale(data.access)})
     },
 
     highlightDot(container, x, ys, yf, w, hs, hf,){
-        this.drawDashedLine(container, {x:x-w,y:ys}, {x:x,y:ys})
-        this.drawDashedLine(container, {x:x-w,y:yf}, {x:x,y:yf})
-        this.drawDashedLine(container, {x:x,y:yf+hf}, {x:x,y:yf})
+        this.drawLine(container, 'dashed_line', {x:x-w,y:ys}, {x:x,y:ys})
+        this.drawLine(container, 'dashed_line', {x:x-w,y:yf}, {x:x,y:yf})
+        this.drawLine(container, 'dashed_line', {x:x,y:yf+hf}, {x:x,y:yf})
     },
 
-    drawDashedLine(container, p1, p2){
+    drawLine(container, id, p1, p2){
         p1.x=p1.x==undefined?0:p1.x;
         p1.y=p1.y==undefined?0:p1.y;
         p2.x=p2.x==undefined?0:p2.x;
         p2.y=p2.y==undefined?0:p2.y;
         container.append('line')
-            .attr('class', 'dashed_line')
+            .attr('class', id)
             .attr('x1', p1.x)
             .attr('y1', p1.y)
             .attr('x2', p2.x)
-            .attr('y2', p2.y)
-            .attr('stroke', 'black')
-            .attr('stroke-width', 2)
-            .attr("stroke-dasharray","16, 4")       
+            .attr('y2', p2.y)   
     },
 
     destroyElements(container, selector){
@@ -200,6 +203,17 @@ export default {
 
 .line.scored{
     stroke: #2a7eeb;
+}
+
+.dashed_line{
+    stroke:black;
+    stroke-width:2;
+    stroke-dasharray:6 4;  
+}
+
+.occurenceLine{
+    stroke:rgb(26, 218, 26);
+    stroke-width:4;
 }
 
 </style>

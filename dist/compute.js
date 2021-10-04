@@ -448,6 +448,8 @@ const analyseComputedPaths = function (computedPaths, mapScenes) {
  */
 const extractScorePerPath = (computedPaths,mapScenes) => {
 
+    console.log('accountedComputedPAths', computedPaths)
+
     const targetCategory='chambre_entrainement';
     let result = [];
     let analysedScenes = [];
@@ -521,8 +523,7 @@ const extractScorePerPath = (computedPaths,mapScenes) => {
     })
 
 
-    console.log('*******Scores Extracted Per Path**********')
-    console.log(result)
+    console.log('*******Scores Extracted Per Path**********',result)
 
     return result;
 }

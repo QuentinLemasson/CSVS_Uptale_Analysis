@@ -15,6 +15,7 @@
     <span @click="currentWindow = 'download'">
       <i class="fas fa-download icon"></i>
     </span>
+
     <!-- <a
       class="icon"
       id="download"

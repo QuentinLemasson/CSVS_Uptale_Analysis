@@ -1,6 +1,6 @@
 <template>
-    <button @click='$emit("pathChange", path.id)' id=pathbutton>
-        Path #{{path.id}} 
+    <button @click='$emit("pathChange", {id : path.id, iteration : path.iteration})' :id='id' class=button>
+        Path #{{path.id}} - Iteration {{path.iteration}} 
     </button>
 </template>
 
@@ -9,7 +9,8 @@
 export default {
   name: "PathButton",
   props: {
-    path: Object
+    path: Object,
+    id: String
   },
   emits: ['pathChange']
 };
@@ -19,6 +20,10 @@ export default {
 
 #pathbutton{
     width : 100px;
+}
+
+.active{
+  background-color: lightgreen;
 }
 
 </style>
