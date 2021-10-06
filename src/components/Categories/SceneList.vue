@@ -54,6 +54,7 @@ export default {
     Scene,
     SceneProperty,
   },
+  emits: ['sceneUpdate'],
   props: {
     mapScenes: {
       type: Map,

@@ -7,9 +7,9 @@
       :fields="fields"
       @filesLoaded="computeData"
       :isLoading="isLoading"
-      :mapScenes="scenes"
-      :mapCategories="categories"
-      :mapThemes="themes"
+      :arrScenes="scenes"
+      :arrCategories="categories"
+      :arrThemes="themes"
       :csvData="csvData"
       :perUserScores="perUserScores"
     />

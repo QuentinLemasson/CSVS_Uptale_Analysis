@@ -32,6 +32,7 @@ export default {
   components: {
     SceneProperty,
   },
+  emits: ['sceneUpdate'],
   data() {
     return {
       border_color: "transparent",

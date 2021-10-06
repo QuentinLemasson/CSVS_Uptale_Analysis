@@ -15,30 +15,8 @@
     <span @click="currentWindow = 'download'">
       <i class="fas fa-download icon"></i>
     </span>
-
-    <!-- <a
-      class="icon"
-      id="download"
-      :href="
-        'data:text/json;charset=utf-8,' +
-        encodeURIComponent(
-          JSON.stringify({
-            arrayScenes: [...mapToArray(this.mapScenes)],
-            arrayCategories: [...mapToArray(this.mapCategories)],
-            arrayThemes: [...mapToArray(this.mapThemes)],
-          })
-        )
-      "
-    >
-      <i class="fas fa-download icon" @click="download"></i
-    ></a> -->
-    <!-- <a
-      class="icon"
-      id="downloadCSV"
-      :href="'data:text/csv;charset=utf-8,' + csvData"
-      ><i class="fas fa-file-csv"></i
-    ></a> -->
   </div>
+
   <Prompt
     v-if="currentWindow == 'upload'"
     :data="fields"
@@ -68,18 +46,6 @@ export default {
     };
   },
   props: {
-    mapScenes: {
-      type: Map,
-      default: [],
-    },
-    mapCategories: {
-      type: Map,
-      default: [],
-    },
-    mapThemes: {
-      type: Map,
-      default: [],
-    },
     csvData: String,
     isLoading: Number,
     perUserScores: Object,
