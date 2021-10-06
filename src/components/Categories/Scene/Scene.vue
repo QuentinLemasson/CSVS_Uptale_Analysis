@@ -70,7 +70,7 @@ export default {
     dragOver(e) {
       e.preventDefault();
       this.border_color = "black";
-      this.borders[e.dataTransfer.getData("type")] = "2px solid red";
+      this.borders[e.dataTransfer.getData("type")] = "3px solid red";
     },
     drop(e) {
       e.preventDefault();
